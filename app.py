@@ -76,8 +76,7 @@ def predict():
         return jsonify({"prediction": result_text, "advice": advice})  # Return JSON response
 
     except Exception as e:
-        return jsonify({"error": str(e)}), 400  # Handle errors (e.g., missing/invalid inputs)
+        return jsonify({"error": str(e)}), 400  # Handle errors
 
-    return render_template("index.html")  # Show the webpage
 if __name__ == "__main__":
     app.run(debug=True)
