@@ -4,10 +4,22 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>My AI App</title>
+    <link rel="stylesheet" href="{{ url_for('Static', filename='css/style.css') }}">
+    <script src="{{ url_for('Static', filename='js/script.js') }}"></script>
+
 </head>
 <body>
     <h1>Welcome to My AI App</h1>
     <p>This is the home page.</p>
+    <form id="prediction-form">
+        <input type="text" name="feature1" placeholder="Enter value 1" required>
+        <input type="text" name="feature2" placeholder="Enter value 2" required>
+        <button type="submit">Predict</button>
+    </form>
+    
+    <div id="result"></div>
+    
 </body>
 </html>
+
 
