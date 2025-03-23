@@ -1,6 +1,8 @@
 from flask import Flask, request, render_template, jsonify
 import pickle
 import numpy as np
+from sklearn.compose import ColumnTransformer
+from sklearn.preprocessing import OneHotEncoder, StandardScaler
 import pandas as pd
 import random  # Import random for varied responses
 
@@ -42,6 +44,29 @@ low_risk_advice = [
     "🌿 Custom Advice 2"
 ]
 
+# Define the feature columns
+categorical_features = ["Gender", "Diet_Quality"]
+numerical_features = ["Family_History", "Glucose_Reading", "Frequent_Urination", "Fatigue", "Blurred_Vision", "Age"]
+
+# 🔹 Define and fit the column transformer
+column_transformer = ColumnTransformer(
+    transformers=[
+        ("cat", OneHotEncoder(handle_unknown="ignore"), categorical_features),
+        ("num", StandardScaler(), numerical_features)
+    ]
+)
+
+# Define and fit the scaler
+scaler = StandardScaler()
+
+# Load training data (this should match how you trained your model)
+try:
+    X_train = pickle.load(open("X_train.pkl", "rb"))  # Load training data if available
+    column_transformer.fit(X_train)  # Fit transformer on training data
+    scaler.fit(column_transformer.transform(X_train))  # Fit scaler on transformed data
+except FileNotFoundError:
+    print("Warning: X_train.pkl not found. Make sure the transformer is properly trained.")
+
 @app.route("/", methods=["GET", "POST"])
 def home():
     return render_template("index.html")  # Ensure this exists
@@ -68,6 +93,7 @@ def predict():
 
         # 🔹 Apply column transformer (ensures correct one-hot encoding)
         new_patient_encoded = column_transformer.transform(new_patient)
+        feature_names = column_transformer.get_feature_names_out()
         new_patient_encoded_df = pd.DataFrame(new_patient_encoded, columns=feature_names)
 
         # 🔹 Scale the transformed data
