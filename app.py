@@ -57,6 +57,9 @@ def predict():
                 data["Fatigue"],
                 data["Blurred_Vision"],
                 data["Age"],
+                data["Gender"],
+                data["Diet_Quality"],
+
             ]).reshape(1, -1)
         else:  # If request comes from form
             input_data = [float(x) for x in request.form.values()]
