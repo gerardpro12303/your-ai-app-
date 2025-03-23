@@ -48,14 +48,6 @@ low_risk_advice = [
 categorical_features = ["Gender", "Diet_Quality"]
 numerical_features = ["Family_History", "Glucose_Reading", "Frequent_Urination", "Fatigue", "Blurred_Vision", "Age"]
 
-# 🔹 Define and fit the column transformer
-column_transformer = ColumnTransformer(
-    transformers=[
-        ("cat", OneHotEncoder(handle_unknown="ignore"), categorical_features),
-        ("num", StandardScaler(), numerical_features)
-    ]
-)
-
 # Define and fit the scaler
 scaler = StandardScaler()
 
