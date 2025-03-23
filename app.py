@@ -63,6 +63,8 @@ try:
 except FileNotFoundError:
     print("Warning: X_train.pkl not found. Make sure the transformer is properly trained.")
 
+feature_names = column_transformer.get_feature_names_out()
+
 # Define and fit the scaler
 scaler = StandardScaler()
 
