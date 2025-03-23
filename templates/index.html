@@ -10,42 +10,29 @@
 <body>
     <h1>Welcome to My AI App</h1>
     <p>This is the home page.</p>
-    
+
     <form id="prediction-form">
-        <label>Family History of Diabetes:</label>
-        <input type="number" name="Family_History" placeholder="0 or 1" required>
-        
-        <label>Glucose Reading:</label>
-        <input type="number" name="Glucose_Reading" placeholder="Enter glucose level" required>
-        
-        <label>Frequent Urination:</label>
-        <input type="number" name="Frequent_Urination" placeholder="0 or 1" required>
-        
-        <label>Fatigue:</label>
-        <input type="number" name="Fatigue" placeholder="0 or 1" required>
-        
-        <label>Blurred Vision:</label>
-        <input type="number" name="Blurred_Vision" placeholder="0 or 1" required>
-        
-        <label>Age:</label>
-        <input type="number" name="Age" placeholder="Enter age" required>
-        
-        <label>Diet Quality:</label>
-        <select name="Diet_Quality" required>
-            <option value="Poor">Poor</option>
-            <option value="Average">Average</option>
+        <input type="number" name="family_history" placeholder="Family History (1 or 0)" required>
+        <input type="number" name="glucose_reading" placeholder="Glucose Reading" required>
+        <input type="number" name="frequent_urination" placeholder="Frequent Urination (1 or 0)" required>
+        <input type="number" name="fatigue" placeholder="Fatigue (1 or 0)" required>
+        <input type="number" name="blurred_vision" placeholder="Blurred Vision (1 or 0)" required>
+        <input type="number" name="age" placeholder="Age" required>
+
+        <select name="diet_quality" required>
             <option value="Good">Good</option>
+            <option value="Average">Average</option>
+            <option value="Poor">Poor</option>
         </select>
-        
-        <label>Gender:</label>
-        <select name="Gender" required>
+
+        <select name="gender" required>
             <option value="Male">Male</option>
             <option value="Female">Female</option>
         </select>
-        
+
         <button type="submit">Predict</button>
     </form>
-    
+
     <div id="result"></div>
 </body>
 </html>
