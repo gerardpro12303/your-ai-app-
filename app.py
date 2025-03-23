@@ -90,32 +90,32 @@ def predict():
             "Gender": [data["Gender"]]
         })
 
-        # ✅ Step 3: Apply the **loaded** column transformer
-        new_patient_encoded = column_transformer.transform(new_patient)
-        feature_names = column_transformer.get_feature_names_out()
-        new_patient_encoded_df = pd.DataFrame(new_patient_encoded, columns=feature_names)
+       # ✅ Step 3: Apply the **loaded** column transformer
+new_patient_encoded = column_transformer.transform(new_patient)
+feature_names = column_transformer.get_feature_names_out()
+new_patient_encoded_df = pd.DataFrame(new_patient_encoded, columns=feature_names)
 
-        # ✅ Scale the transformed data using the **loaded** scaler
-        new_patient_scaled = scaler.fit_transform(new_patient_encoded_df)
-        new_patient_encoded_df = pd.DataFrame(new_patient_encoded, columns=column_transformer.get_feature_names_out())
+# ✅ Scale the transformed data using the **loaded** scaler
+new_patient_scaled = scaler.transform(new_patient_encoded_df)  # Use transform() instead of fit_transform()
+new_patient_scaled_df = pd.DataFrame(new_patient_scaled, columns=feature_names)  # Correct variable name for scaled data
 
-        # 🔹 Make a prediction
-        prediction = model.predict(new_patient_scaled_df)[0]
-        prediction_proba = model.predict_proba(new_patient_scaled_df)
+# 🔹 Make a prediction
+prediction = model.predict(new_patient_scaled_df)[0]
+prediction_proba = model.predict_proba(new_patient_scaled_df)
 
-        # 🔹 Interpret the result
-        if prediction == 1:
-            result_text = random.choice(high_risk_messages)
-            advice = random.choice(high_risk_advice)
-        else:
-            result_text = random.choice(low_risk_messages)
-            advice = random.choice(low_risk_advice)
+# 🔹 Interpret the result
+if prediction == 1:
+    result_text = random.choice(high_risk_messages)
+    advice = random.choice(high_risk_advice)
+else:
+    result_text = random.choice(low_risk_messages)
+    advice = random.choice(low_risk_advice)
 
-        return jsonify({
-            "prediction": result_text,
-            "advice": advice,
-            "confidence": prediction_proba.tolist()
-        })
+return jsonify({
+    "prediction": result_text,
+    "advice": advice,
+    "confidence": prediction_proba.tolist()
+})
 
     except Exception as e:
         return jsonify({"error": str(e)}), 400
