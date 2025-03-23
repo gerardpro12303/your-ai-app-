@@ -4,7 +4,7 @@ import numpy as np
 from sklearn.compose import ColumnTransformer
 from sklearn.preprocessing import OneHotEncoder, StandardScaler
 import pandas as pd
-import random  # Import random for varied responses
+import random
 
 app = Flask(__name__)
 
@@ -48,16 +48,28 @@ low_risk_advice = [
 categorical_features = ["Gender", "Diet_Quality"]
 numerical_features = ["Family_History", "Glucose_Reading", "Frequent_Urination", "Fatigue", "Blurred_Vision", "Age"]
 
-# Define and fit the scaler
-scaler = StandardScaler()
+# 🔹 Define the column transformer (this is where the error occurred)
+column_transformer = ColumnTransformer(
+    transformers=[
+        ("cat", OneHotEncoder(handle_unknown="ignore"), categorical_features),
+        ("num", StandardScaler(), numerical_features)
+    ]
+)
 
 # Load training data (this should match how you trained your model)
 try:
     X_train = pickle.load(open("X_train.pkl", "rb"))  # Load training data if available
     column_transformer.fit(X_train)  # Fit transformer on training data
-    scaler.fit(column_transformer.transform(X_train))  # Fit scaler on transformed data
 except FileNotFoundError:
     print("Warning: X_train.pkl not found. Make sure the transformer is properly trained.")
+
+# Define and fit the scaler
+scaler = StandardScaler()
+
+try:
+    scaler.fit(column_transformer.transform(X_train))  # Fit scaler on transformed data
+except NameError:
+    print("Warning: ColumnTransformer has not been fitted yet.")
 
 @app.route("/", methods=["GET", "POST"])
 def home():
@@ -79,16 +91,16 @@ def predict():
             "Fatigue": [int(data["Fatigue"])],
             "Blurred_Vision": [int(data["Blurred_Vision"])],
             "Age": [int(data["Age"])],
-            "Diet_Quality": [data["Diet_Quality"]],  # Keep original categorical value
-            "Gender": [data["Gender"]]  # Keep original categorical value
+            "Diet_Quality": [data["Diet_Quality"]],
+            "Gender": [data["Gender"]]
         })
 
-        # 🔹 Apply column transformer (ensures correct one-hot encoding)
+        # ✅ Step 3: Apply the **loaded** column transformer
         new_patient_encoded = column_transformer.transform(new_patient)
         feature_names = column_transformer.get_feature_names_out()
         new_patient_encoded_df = pd.DataFrame(new_patient_encoded, columns=feature_names)
 
-        # 🔹 Scale the transformed data
+        # ✅ Scale the transformed data using the **loaded** scaler
         new_patient_scaled = scaler.transform(new_patient_encoded_df)
         new_patient_scaled_df = pd.DataFrame(new_patient_scaled, columns=feature_names)
 
@@ -112,6 +124,10 @@ def predict():
 
     except Exception as e:
         return jsonify({"error": str(e)}), 400
+
+if __name__ == "__main__":
+    app.run(debug=True)
+
 
 if __name__ == "__main__":
     app.run(debug=True)
