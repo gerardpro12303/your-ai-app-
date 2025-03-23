@@ -1,7 +1,8 @@
-<script>
 document.addEventListener("DOMContentLoaded", function () {
     document.getElementById("prediction-form").addEventListener("submit", async function (event) {
         event.preventDefault(); // Stop page reload
+        
+        console.log("Submit button clicked!"); // Debugging step
 
         // Collect input values
         let formData = {
@@ -15,6 +16,8 @@ document.addEventListener("DOMContentLoaded", function () {
             "Gender": document.querySelector("select[name='gender']").value
         };
 
+        console.log("Form Data Collected:", formData); // Debugging step
+
         try {
             let response = await fetch("/predict", {
                 method: "POST",
@@ -22,7 +25,11 @@ document.addEventListener("DOMContentLoaded", function () {
                 body: JSON.stringify(formData)
             });
 
+            console.log("Response received:", response); // Debugging step
+
             let result = await response.json();
+            console.log("Prediction result:", result); // Debugging step
+
             document.getElementById("result").innerHTML = `<h3>Prediction: ${result.prediction}</h3>`;
         } catch (error) {
             console.error("Error:", error);
@@ -30,4 +37,3 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     });
 });
-</script>
