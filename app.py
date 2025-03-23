@@ -46,9 +46,11 @@ def home():
     return render_template("index.html")  # Ensure this exists
 
 @app.route("/predict", methods=["POST"])
+
 def predict():
-gender_mapping = {"Male": 0, "Female": 1}  
-diet_mapping = {"Poor": 0, "Average": 1, "Good": 2}
+    gender_mapping = {"Male": 0, "Female": 1}  
+    diet_mapping = {"Poor": 0, "Average": 1, "Good": 2}
+
     try:
         if request.is_json:  # If request comes from JSON
             data = request.json
