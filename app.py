@@ -43,7 +43,7 @@ low_risk_advice = [
 
 @app.route("/", methods=["GET", "POST"])
 def home():
-    return render_template("index.html")
+    return render_template("index.html")  # Ensure this exists
 
 @app.route("/predict", methods=["POST"])
 def predict():
