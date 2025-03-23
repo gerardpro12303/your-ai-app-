@@ -97,7 +97,7 @@ def predict():
 
         # ✅ Scale the transformed data using the **loaded** scaler
         new_patient_scaled = scaler.transform(new_patient_encoded_df)  # Use transform() instead of fit_transform()
-        new_patient_scaled_df = pd.DataFrame(new_patient_scaled, columns=feature_names)  # Correct variable name for scaled data
+        new_patient_scaled_df = pd.DataFrame(new_patient_scaled, columns=feature_names)
 
         # 🔹 Make a prediction
         prediction = model.predict(new_patient_scaled_df)[0]
