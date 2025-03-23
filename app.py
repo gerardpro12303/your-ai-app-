@@ -76,7 +76,9 @@ def predict():
         if request.is_json:  
             data = request.json  
         else:  
-            data = request.form.to_dict()  
+            data = request.form.to_dict() 
+
+        new_patient_df = pd.DataFrame([new_patient])
 
         # 🔹 Define input as a DataFrame
         new_patient = pd.DataFrame({
