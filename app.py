@@ -46,45 +46,53 @@ def home():
     return render_template("index.html")  # Ensure this exists
 
 @app.route("/predict", methods=["POST"])
-
 def predict():
-    gender_mapping = {"Male": 0, "Female": 1}  
-    diet_mapping = {"Poor": 0, "Average": 1, "Good": 2}
-
     try:
-        if request.is_json:  # If request comes from JSON
-            data = request.json
-            features = np.array([
-                data["Family_History"],
-                data["Glucose_Reading"],
-                data["Frequent_Urination"],
-                data["Fatigue"],
-                data["Blurred_Vision"],
-                data["Age"],
-                gender_mapping.get(data["Gender"], 0),  # Convert Gender to number
-        diet_mapping.get(data["Diet_Quality"], 1)
+        if request.is_json:  
+            data = request.json  
+        else:  
+            data = request.form.to_dict()  
 
-            ]).reshape(1, -1)
-        else:  # If request comes from form
-            input_data = [float(x) for x in request.form.values()]
-            features = np.array([input_data])
+        # 🔹 Define input as a DataFrame
+        new_patient = pd.DataFrame({
+            "Family_History": [int(data["Family_History"])],
+            "Glucose_Reading": [float(data["Glucose_Reading"])],
+            "Frequent_Urination": [int(data["Frequent_Urination"])],
+            "Fatigue": [int(data["Fatigue"])],
+            "Blurred_Vision": [int(data["Blurred_Vision"])],
+            "Age": [int(data["Age"])],
+            "Diet_Quality": [data["Diet_Quality"]],  # Keep original categorical value
+            "Gender": [data["Gender"]]  # Keep original categorical value
+        })
 
-        # Make prediction using the trained model
-        prediction = model.predict(features)[0]
-        risk_level = int(prediction)  # Convert to integer (0 or 1)
+        # 🔹 Apply column transformer (ensures correct one-hot encoding)
+        new_patient_encoded = column_transformer.transform(new_patient)
+        new_patient_encoded_df = pd.DataFrame(new_patient_encoded, columns=feature_names)
 
-        # Select message and advice based on prediction
-        if risk_level == 1:
+        # 🔹 Scale the transformed data
+        new_patient_scaled = scaler.transform(new_patient_encoded_df)
+        new_patient_scaled_df = pd.DataFrame(new_patient_scaled, columns=feature_names)
+
+        # 🔹 Make a prediction
+        prediction = model.predict(new_patient_scaled_df)[0]
+        prediction_proba = model.predict_proba(new_patient_scaled_df)
+
+        # 🔹 Interpret the result
+        if prediction == 1:
             result_text = random.choice(high_risk_messages)
             advice = random.choice(high_risk_advice)
         else:
             result_text = random.choice(low_risk_messages)
             advice = random.choice(low_risk_advice)
 
-        return jsonify({"prediction": result_text, "advice": advice})  # Return JSON response
+        return jsonify({
+            "prediction": result_text,
+            "advice": advice,
+            "confidence": prediction_proba.tolist()
+        })
 
     except Exception as e:
-        return jsonify({"error": str(e)}), 400  # Handle errors
+        return jsonify({"error": str(e)}), 400
 
 if __name__ == "__main__":
     app.run(debug=True)
