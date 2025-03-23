@@ -47,6 +47,8 @@ def home():
 
 @app.route("/predict", methods=["POST"])
 def predict():
+gender_mapping = {"Male": 0, "Female": 1}  
+diet_mapping = {"Poor": 0, "Average": 1, "Good": 2}
     try:
         if request.is_json:  # If request comes from JSON
             data = request.json
@@ -57,8 +59,8 @@ def predict():
                 data["Fatigue"],
                 data["Blurred_Vision"],
                 data["Age"],
-                data["Gender"],
-                data["Diet_Quality"],
+                gender_mapping.get(data["Gender"], 0),  # Convert Gender to number
+        diet_mapping.get(data["Diet_Quality"], 1)
 
             ]).reshape(1, -1)
         else:  # If request comes from form
