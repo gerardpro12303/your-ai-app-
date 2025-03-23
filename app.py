@@ -1,6 +1,7 @@
 from flask import Flask, request, render_template, jsonify
 import pickle
 import numpy as np
+import pandas as pd
 import random  # Import random for varied responses
 
 app = Flask(__name__)
