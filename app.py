@@ -44,29 +44,42 @@ low_risk_advice = [
 @app.route("/", methods=["GET", "POST"])
 def home():
     if request.method == "POST":
-        try:
-            # Get user input from form
+        @app.route("/predict", methods=["POST"])
+def predict():
+    try:
+        if request.is_json:  # If request comes from JSON
+            data = request.json
+            features = np.array([
+                data["Family_History"],
+                data["Glucose_Reading"],
+                data["Frequent_Urination"],
+                data["Fatigue"],
+                data["Blurred_Vision"],
+                data["Age"],
+            ]).reshape(1, -1)
+        else:  # If request comes from form
             input_data = [float(x) for x in request.form.values()]
-            input_array = np.array([input_data])
-            
-            # Make prediction using the trained model
-            prediction = model.predict(input_array)
-            risk_level = int(prediction[0])  # Convert to integer (0 or 1)
+            features = np.array([input_data])
 
-            # Select message and advice based on prediction
-            if risk_level == 1:
-                result_text = random.choice(high_risk_messages)
-                advice = random.choice(high_risk_advice)
-            else:
-                result_text = random.choice(low_risk_messages)
-                advice = random.choice(low_risk_advice)
+        # Make prediction using the trained model
+        prediction = model.predict(features)[0]
+        risk_level = int(prediction)  # Convert to integer (0 or 1)
 
-            return jsonify({"prediction": result_text, "advice": advice})  # Return JSON response
+        # Select message and advice based on prediction
+        if risk_level == 1:
+            result_text = random.choice(high_risk_messages)
+            advice = random.choice(high_risk_advice)
+        else:
+            result_text = random.choice(low_risk_messages)
+            advice = random.choice(low_risk_advice)
 
-        except Exception as e:
-            return jsonify({"error": str(e)}), 400  # Handle errors (e.g., missing/invalid inputs)
+        return jsonify({"prediction": result_text, "advice": advice})  # Return JSON response
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 400  # Handle errors (e.g., missing/invalid inputs)
 
     return render_template("index.html")  # Show the webpage
+
 
 if __name__ == "__main__":
     app.run(debug=True)
