@@ -63,15 +63,8 @@ try:
 except FileNotFoundError:
     print("Warning: X_train.pkl not found. Make sure the transformer is properly trained.")
 
-feature_names = column_transformer.get_feature_names_out()
-
-# Define and fit the scaler
+# Define and fit the scaler (only if needed)
 scaler = StandardScaler()
-
-try:
-    scaler.fit(column_transformer.transform(X_train))  # Fit scaler on transformed data
-except NameError:
-    print("Warning: ColumnTransformer has not been fitted yet.")
 
 @app.route("/", methods=["GET", "POST"])
 def home():
@@ -103,7 +96,7 @@ def predict():
         new_patient_encoded_df = pd.DataFrame(new_patient_encoded, columns=feature_names)
 
         # ✅ Scale the transformed data using the **loaded** scaler
-        new_patient_scaled = scaler.transform(new_patient_encoded_df)
+        new_patient_scaled = scaler.fit_transform(new_patient_encoded_df)
         new_patient_scaled_df = pd.DataFrame(new_patient_scaled, columns=feature_names)
 
         # 🔹 Make a prediction
