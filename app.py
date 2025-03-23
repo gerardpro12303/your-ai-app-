@@ -1,7 +1,12 @@
 from flask import Flask, request, render_template, jsonify
+import pickle
+import numpy as np
 import random  # Import random for varied responses
 
 app = Flask(__name__)
+
+# Load the trained model
+model = pickle.load(open("model.pkl", "rb"))
 
 # Lists of different responses for variation
 high_risk_messages = [
@@ -39,19 +44,29 @@ low_risk_advice = [
 @app.route("/", methods=["GET", "POST"])
 def home():
     if request.method == "POST":
-        # Simulating prediction logic (replace with real prediction)
-        prediction_result = random.choice([1, 0])  # Randomly simulate risk levels
+        try:
+            # Get user input from form
+            input_data = [float(x) for x in request.form.values()]
+            input_array = np.array([input_data])
+            
+            # Make prediction using the trained model
+            prediction = model.predict(input_array)
+            risk_level = int(prediction[0])  # Convert to integer (0 or 1)
 
-        if prediction_result == 1:
-            result_text = random.choice(high_risk_messages)
-            advice = random.choice(high_risk_advice)
-        else:
-            result_text = random.choice(low_risk_messages)
-            advice = random.choice(low_risk_advice)
+            # Select message and advice based on prediction
+            if risk_level == 1:
+                result_text = random.choice(high_risk_messages)
+                advice = random.choice(high_risk_advice)
+            else:
+                result_text = random.choice(low_risk_messages)
+                advice = random.choice(low_risk_advice)
 
-        return jsonify({"prediction": result_text, "advice": advice})  # Return JSON response
+            return jsonify({"prediction": result_text, "advice": advice})  # Return JSON response
 
-    return render_template("index.html")  # Show the home page
+        except Exception as e:
+            return jsonify({"error": str(e)}), 400  # Handle errors (e.g., missing/invalid inputs)
+
+    return render_template("index.html")  # Show the webpage
 
 if __name__ == "__main__":
     app.run(debug=True)
