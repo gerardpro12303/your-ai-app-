@@ -79,7 +79,5 @@ def predict():
         return jsonify({"error": str(e)}), 400  # Handle errors (e.g., missing/invalid inputs)
 
     return render_template("index.html")  # Show the webpage
-
-
 if __name__ == "__main__":
     app.run(debug=True)
