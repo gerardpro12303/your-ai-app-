@@ -71,7 +71,7 @@ def predict():
              "Age": [int(data["Age"])],
              "Diet_Quality": [data["Diet_Quality"]],  # Ensure the value is 'Good', 'Poor', or 'Average'
              "Gender": [data["Gender"]]  # Ensure valid values 'Male' or 'Female'
-})
+        })
 
         # Transform the data (do not call fit again, just transform)
         new_patient_encoded = column_transformer.transform(new_patient_df)
@@ -100,4 +100,5 @@ def predict():
 
 if __name__ == "__main__":
     app.run(debug=True)
+
 
