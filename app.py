@@ -22,9 +22,7 @@ column_transformer = ColumnTransformer(
     ]
 )
 
-scaler = StandardScaler()
-
-# Fit the column transformer and scaler on sample training data
+# Fit transformers on sample training data only once at the start of the app
 X_train = pd.DataFrame({
     "Family_History": [0, 1],
     "Glucose_Reading": [100, 150],
@@ -36,9 +34,8 @@ X_train = pd.DataFrame({
     "Gender": ['Male', 'Female']
 })
 
-# Fit transformers on the training data
+# Fit transformers on the training data at the start of the app
 column_transformer.fit(X_train)
-scaler.fit(X_train)
 
 # Lists of responses for variation
 high_risk_messages = [
@@ -81,13 +78,9 @@ def predict():
         feature_names = column_transformer.get_feature_names_out()
         new_patient_encoded_df = pd.DataFrame(new_patient_encoded, columns=feature_names)
 
-        # Scale the data
-        new_patient_scaled = scaler.transform(new_patient_encoded_df)
-        new_patient_scaled_df = pd.DataFrame(new_patient_scaled, columns=feature_names)
-
-        # Make prediction
-        prediction = model.predict(new_patient_scaled_df)[0]
-        prediction_proba = model.predict_proba(new_patient_scaled_df)
+        # Make prediction using the pre-fitted model
+        prediction = model.predict(new_patient_encoded_df)[0]
+        prediction_proba = model.predict_proba(new_patient_encoded_df)
 
         # Return results based on the prediction
         if prediction == 1:
