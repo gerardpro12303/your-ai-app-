@@ -7,7 +7,7 @@ from sklearn.preprocessing import OneHotEncoder, StandardScaler
 
 app = Flask(__name__)
 
-# Load the trained model and column transformer (this assumes model.pkl and column_transformer.pkl exist in the same directory)
+# Load the trained model (this assumes model.pkl and column_transformer.pkl exist in the same directory)
 model = pickle.load(open("model.pkl", "rb"))
 column_transformer = pickle.load(open("column_transformer.pkl", "rb"))
 
@@ -78,5 +78,6 @@ def predict():
 
 if __name__ == "__main__":
     app.run(debug=True)
+
 
 
