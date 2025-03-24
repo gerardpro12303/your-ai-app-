@@ -14,10 +14,10 @@ model = pickle.load(open("model.pkl", "rb"))
 categorical_features = ["Gender", "Diet_Quality"]
 numerical_features = ["Family_History", "Glucose_Reading", "Frequent_Urination", "Fatigue", "Blurred_Vision", "Age"]
 
-# Define the column transformer and scaler (we'll fit them once when the app starts)
+# Define the column transformer (this includes both one-hot encoding and scaling)
 column_transformer = ColumnTransformer(
     transformers=[
-        ("cat", OneHotEncoder(categories='auto', handle_unknown="ignore"), categorical_features),
+        ("cat", OneHotEncoder(handle_unknown="ignore"), categorical_features),
         ("num", StandardScaler(), numerical_features)
     ]
 )
@@ -76,6 +76,8 @@ def predict():
         # Transform the data (do not call fit again, just transform)
         new_patient_encoded = column_transformer.transform(new_patient_df)
         feature_names = column_transformer.get_feature_names_out()
+
+        # Ensure that the DataFrame is properly constructed with the correct columns
         new_patient_encoded_df = pd.DataFrame(new_patient_encoded, columns=feature_names)
 
         # Make prediction using the pre-fitted model
@@ -93,12 +95,9 @@ def predict():
             "confidence": prediction_proba.tolist()
         })
 
-    except KeyError as e:
-        return jsonify({"error": f"Missing feature: {str(e)}"}), 400
     except Exception as e:
         return jsonify({"error": str(e)}), 400
 
 if __name__ == "__main__":
     app.run(debug=True)
-
 
