@@ -48,7 +48,7 @@ low_risk_advice = [
 categorical_features = ["Gender", "Diet_Quality"]
 numerical_features = ["Family_History", "Glucose_Reading", "Frequent_Urination", "Fatigue", "Blurred_Vision", "Age"]
 
-# 🔹 Define the column transformer (this is where the error occurred)
+# 🔹 Define the column transformer
 column_transformer = ColumnTransformer(
     transformers=[
         ("cat", OneHotEncoder(handle_unknown="ignore"), categorical_features),
@@ -56,16 +56,15 @@ column_transformer = ColumnTransformer(
     ]
 )
 
-# Load training data (this should match how you trained your model)
+# Load training data and fit the transformer and scaler (if available)
 try:
     X_train = pickle.load(open("X_train.pkl", "rb"))  # Load training data if available
-    column_transformer.fit(X_train)  # Fit transformer on training data
+    column_transformer.fit(X_train)  # Fit the transformer on training data
+    scaler = column_transformer.transformers_[1][1]  # Extract the fitted scaler from column_transformer
 except FileNotFoundError:
     print("Warning: X_train.pkl not found. Make sure the transformer is properly trained.")
 
-# Define and fit the scaler (only if needed)
-scaler = StandardScaler()
-
+# Initialize the Flask app
 @app.route("/", methods=["GET", "POST"])
 def home():
     return render_template("index.html")  # Ensure this exists
