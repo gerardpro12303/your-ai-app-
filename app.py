@@ -17,7 +17,7 @@ numerical_features = ["Family_History", "Glucose_Reading", "Frequent_Urination",
 # Define the column transformer (this includes both one-hot encoding and scaling)
 column_transformer = ColumnTransformer(
     transformers=[
-        ("cat", OneHotEncoder(handle_unknown="ignore", sparse=False), categorical_features),
+        ("cat", OneHotEncoder(handle_unknown="ignore", sparse_output=False), categorical_features),
         ("num", StandardScaler(), numerical_features)
     ]
 )
