@@ -35,6 +35,10 @@ def predict():
         else:
             data = request.form.to_dict()
 
+        # Ensure categorical values are correctly processed
+        diet_quality = data.get("Diet_Quality", "Good")  # Default to 'Good' if not provided
+        gender = data.get("Gender", "Male")  # Default to 'Male' if not provided
+
         # Create a DataFrame for the incoming data
         new_patient_df = pd.DataFrame({
              "Family_History": [int(data["Family_History"])],
@@ -43,8 +47,8 @@ def predict():
              "Fatigue": [int(data["Fatigue"])],
              "Blurred_Vision": [int(data["Blurred_Vision"])],
              "Age": [int(data["Age"])],
-             "Diet_Quality": [data["Diet_Quality"]],  # Ensure the value is 'Good', 'Poor', or 'Average'
-             "Gender": [data["Gender"]]  # Ensure valid values 'Male' or 'Female'
+             "Diet_Quality": [diet_quality],  # Ensure the value is 'Good', 'Poor', or 'Average'
+             "Gender": [gender]  # Ensure valid values 'Male' or 'Female'
         })
 
         # Transform the data (do not call fit again, just transform)
@@ -74,4 +78,5 @@ def predict():
 
 if __name__ == "__main__":
     app.run(debug=True)
+
 
