@@ -30,7 +30,7 @@ X_train = pd.DataFrame({
     "Fatigue": [0, 1],
     "Blurred_Vision": [0, 1],
     "Age": [25, 30],
-    "Diet_Quality": ['Good', 'Poor'],
+    "Diet_Quality": ['Good', 'Averager', 'Poor'],
     "Gender": ['Male', 'Female']
 })
 
@@ -63,13 +63,13 @@ def predict():
 
         # Create a DataFrame for the incoming data
         new_patient_df = pd.DataFrame({
-            "Family_History": [int(data["Family_History"])],
+           "Family_History": [int(data["Family_History"])],
             "Glucose_Reading": [float(data["Glucose_Reading"])],
             "Frequent_Urination": [int(data["Frequent_Urination"])],
             "Fatigue": [int(data["Fatigue"])],
             "Blurred_Vision": [int(data["Blurred_Vision"])],
             "Age": [int(data["Age"])],
-            "Diet_Quality": [data["Diet_Quality"]],
+            "Diet_Quality": [data["Diet_Quality"]],  # Ensure the value is 'Good', 'Poor', or 'Average'
             "Gender": [data["Gender"]]
         })
 
