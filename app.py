@@ -41,7 +41,7 @@ def predict():
         # Log the incoming data for debugging
         print("Received data:", data)
 
-        # Create DataFrame for incoming data
+        # Create DataFrame for incoming data - treating categorical features properly
         new_patient_df = pd.DataFrame({
             "Family_History": [int(data["Family_History"])],
             "Glucose_Reading": [float(data["Glucose_Reading"])],
@@ -49,8 +49,8 @@ def predict():
             "Fatigue": [int(data["Fatigue"])],
             "Blurred_Vision": [int(data["Blurred_Vision"])],
             "Age": [int(data["Age"])],
-            "Diet_Quality": [data["Diet_Quality"]],
-            "Gender": [data["Gender"]]
+            "Diet_Quality": [data["Diet_Quality"]],  # Leave as string, column transformer will handle it
+            "Gender": [data["Gender"]]  # Leave as string, column transformer will handle it
         })
 
         # Transform the data using the pre-fitted column transformer
