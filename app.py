@@ -25,7 +25,7 @@ low_risk_messages = [
 
 @app.route("/", methods=["GET", "POST"])
 def home():
-    return "Welcome to the Diabetes Risk Prediction API!"
+    return render_template("index.html")"
 
 @app.route("/predict", methods=["POST"])
 def predict():
