@@ -17,7 +17,7 @@ numerical_features = ["Family_History", "Glucose_Reading", "Frequent_Urination",
 # Define the column transformer and scaler (we'll fit them once when the app starts)
 column_transformer = ColumnTransformer(
     transformers=[
-        ("cat", OneHotEncoder(handle_unknown="ignore"), categorical_features),
+        ("cat", OneHotEncoder(categories='auto', handle_unknown="ignore"), categorical_features),
         ("num", StandardScaler(), numerical_features)
     ]
 )
@@ -93,6 +93,8 @@ def predict():
             "confidence": prediction_proba.tolist()
         })
 
+    except KeyError as e:
+        return jsonify({"error": f"Missing feature: {str(e)}"}), 400
     except Exception as e:
         return jsonify({"error": str(e)}), 400
 
