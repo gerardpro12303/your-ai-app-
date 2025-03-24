@@ -9,6 +9,8 @@ app = Flask(__name__)
 
 # Load the trained model (this assumes model.pkl exists in the same directory)
 model = pickle.load(open("model.pkl", "rb"))
+column_transformer = pickle.load(open("column_transformer.pkl", "rb"))
+scaler = pickle.load(open("scaler.pkl", "rb"))
 
 # Define the feature columns
 categorical_features = ["Gender", "Diet_Quality"]
