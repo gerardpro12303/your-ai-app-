@@ -1,54 +1,20 @@
 from flask import Flask, request, render_template, jsonify
 import pickle
-import numpy as np
-from sklearn.compose import ColumnTransformer
-from sklearn.preprocessing import OneHotEncoder, StandardScaler
 import pandas as pd
 import random
+from sklearn.compose import ColumnTransformer
+from sklearn.preprocessing import OneHotEncoder, StandardScaler
 
 app = Flask(__name__)
 
-# Load the trained model
+# Load the trained model (this assumes model.pkl exists in the same directory)
 model = pickle.load(open("model.pkl", "rb"))
-
-# Lists of different responses for variation
-high_risk_messages = [
-    "⚠️ High Risk of Diabetes Detected! Please consult a doctor immediately.",
-    "🩺 Your results indicate a high risk of diabetes. Medical consultation is advised.",
-    "🚨 Warning: You may be at risk for diabetes. Early detection is key, seek medical help.",
-    "❗ Custom Message 1",
-    "❗ Custom Message 2"
-]
-
-low_risk_messages = [
-    "✅ No immediate risk detected. Keep up your healthy habits!",
-    "🌟 Your results show no signs of diabetes. Stay active and eat well!",
-    "👍 No diabetes risk detected for now. Maintain a balanced lifestyle.",
-    "💚 Custom Message 1",
-    "💚 Custom Message 2"
-]
-
-high_risk_advice = [
-    "💡 Tips: Cut down on processed sugar, eat fiber-rich food, and stay hydrated.",
-    "🍏 Try incorporating more vegetables and lean protein into your diet.",
-    "🏃‍♂️ Regular physical activity and routine check-ups can help manage your risk.",
-    "🛑 Custom Advice 1",
-    "🛑 Custom Advice 2"
-]
-
-low_risk_advice = [
-    "💡 Keep up the good work! Exercise and proper diet are key to long-term health.",
-    "🥗 Consider adding more whole foods to your meals for better nutrition.",
-    "🩺 Even without risk now, routine check-ups help prevent future problems.",
-    "🌿 Custom Advice 1",
-    "🌿 Custom Advice 2"
-]
 
 # Define the feature columns
 categorical_features = ["Gender", "Diet_Quality"]
 numerical_features = ["Family_History", "Glucose_Reading", "Frequent_Urination", "Fatigue", "Blurred_Vision", "Age"]
 
-# 🔹 Define the column transformer
+# Define the column transformer and scaler (we'll fit them once when the app starts)
 column_transformer = ColumnTransformer(
     transformers=[
         ("cat", OneHotEncoder(handle_unknown="ignore"), categorical_features),
@@ -56,29 +22,49 @@ column_transformer = ColumnTransformer(
     ]
 )
 
-# Load training data and fit the transformer and scaler (if available)
-try:
-    X_train = pickle.load(open("X_train.pkl", "rb"))  # Load training data if available
-    column_transformer.fit(X_train)  # Fit the transformer on training data
-    scaler = column_transformer.transformers_[1][1]  # Extract the fitted scaler from column_transformer
-except FileNotFoundError:
-    print("Warning: X_train.pkl not found. Make sure the transformer is properly trained.")
+scaler = StandardScaler()
 
-# Initialize the Flask app
+# Fit the column transformer and scaler on sample training data
+X_train = pd.DataFrame({
+    "Family_History": [0, 1],
+    "Glucose_Reading": [100, 150],
+    "Frequent_Urination": [0, 1],
+    "Fatigue": [0, 1],
+    "Blurred_Vision": [0, 1],
+    "Age": [25, 30],
+    "Diet_Quality": ['Good', 'Poor'],
+    "Gender": ['Male', 'Female']
+})
+
+# Fit transformers on the training data
+column_transformer.fit(X_train)
+scaler.fit(X_train)
+
+# Lists of responses for variation
+high_risk_messages = [
+    "⚠️ High Risk of Diabetes Detected! Please consult a doctor immediately.",
+    "🩺 Your results indicate a high risk of diabetes. Medical consultation is advised.",
+    "🚨 Warning: You may be at risk for diabetes. Early detection is key, seek medical help."
+]
+
+low_risk_messages = [
+    "✅ No immediate risk detected. Keep up your healthy habits!",
+    "🌟 Your results show no signs of diabetes. Stay active and eat well!"
+]
+
 @app.route("/", methods=["GET", "POST"])
 def home():
-    return render_template("index.html")  # Ensure this exists
+    return render_template("index.html")
 
 @app.route("/predict", methods=["POST"])
 def predict():
     try:
-        # Check if the request contains JSON data
-        if request.is_json:  
-            data = request.json  
-        else:  
-            data = request.form.to_dict()  
+        if request.is_json:
+            data = request.json
+        else:
+            data = request.form.to_dict()
 
-        # 🔹 Define the new patient data as a DataFrame from the received data
+        # Create a DataFrame for the incoming data
         new_patient_df = pd.DataFrame({
             "Family_History": [int(data["Family_History"])],
             "Glucose_Reading": [float(data["Glucose_Reading"])],
@@ -90,32 +76,30 @@ def predict():
             "Gender": [data["Gender"]]
         })
 
-        # ✅ Step 3: Apply the **loaded** column transformer
+        # Transform the data (do not call fit again, just transform)
         new_patient_encoded = column_transformer.transform(new_patient_df)
         feature_names = column_transformer.get_feature_names_out()
         new_patient_encoded_df = pd.DataFrame(new_patient_encoded, columns=feature_names)
 
-        # ✅ Scale the transformed data using the **loaded** scaler
-        new_patient_scaled = scaler.transform(new_patient_encoded_df)  # Use transform() instead of fit_transform()
+        # Scale the data
+        new_patient_scaled = scaler.transform(new_patient_encoded_df)
         new_patient_scaled_df = pd.DataFrame(new_patient_scaled, columns=feature_names)
 
-        # 🔹 Make a prediction
+        # Make prediction
         prediction = model.predict(new_patient_scaled_df)[0]
         prediction_proba = model.predict_proba(new_patient_scaled_df)
 
-        # 🔹 Interpret the result
+        # Return results based on the prediction
         if prediction == 1:
             result_text = random.choice(high_risk_messages)
-            advice = random.choice(high_risk_advice)
         else:
             result_text = random.choice(low_risk_messages)
-            advice = random.choice(low_risk_advice)
 
         return jsonify({
             "prediction": result_text,
-            "advice": advice,
             "confidence": prediction_proba.tolist()
         })
+
     except Exception as e:
         return jsonify({"error": str(e)}), 400
 
