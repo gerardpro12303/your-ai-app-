@@ -73,15 +73,14 @@ def home():
 @app.route("/predict", methods=["POST"])
 def predict():
     try:
+        # Check if the request contains JSON data
         if request.is_json:  
             data = request.json  
         else:  
-            data = request.form.to_dict() 
+            data = request.form.to_dict()  
 
-        new_patient_df = pd.DataFrame([new_patient])
-
-        # 🔹 Define input as a DataFrame
-        new_patient = pd.DataFrame({
+        # 🔹 Define the new patient data as a DataFrame from the received data
+        new_patient_df = pd.DataFrame({
             "Family_History": [int(data["Family_History"])],
             "Glucose_Reading": [float(data["Glucose_Reading"])],
             "Frequent_Urination": [int(data["Frequent_Urination"])],
@@ -92,7 +91,7 @@ def predict():
             "Gender": [data["Gender"]]
         })
 
-      # ✅ Step 3: Apply the **loaded** column transformer
+        # ✅ Step 3: Apply the **loaded** column transformer
         new_patient_encoded = column_transformer.transform(new_patient_df)
         feature_names = column_transformer.get_feature_names_out()
         new_patient_encoded_df = pd.DataFrame(new_patient_encoded, columns=feature_names)
