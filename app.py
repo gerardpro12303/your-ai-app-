@@ -26,7 +26,7 @@ column_transformer = ColumnTransformer(
 X_train = pd.DataFrame({
     "Family_History": [0, 1, 0],
     "Glucose_Reading": [100, 150, 99],
-    "Frequent_Urination": [0, 1], 0,
+    "Frequent_Urination": [0, 1, 0],
     "Fatigue": [0, 1, 0],
     "Blurred_Vision": [0, 1, 0],
     "Age": [25, 30, 20],
