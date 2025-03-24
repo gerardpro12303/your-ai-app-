@@ -7,9 +7,28 @@ from sklearn.preprocessing import OneHotEncoder, StandardScaler
 
 app = Flask(__name__)
 
-# Load the trained model (this assumes model.pkl and column_transformer.pkl exist in the same directory)
+# Load the trained model and transformers (this assumes the model, column_transformer, and scaler are already saved)
 model = pickle.load(open("model.pkl", "rb"))
 column_transformer = pickle.load(open("column_transformer.pkl", "rb"))
+
+# Define the feature columns
+categorical_features = ["Gender", "Diet_Quality"]
+numerical_features = ["Family_History", "Glucose_Reading", "Frequent_Urination", "Fatigue", "Blurred_Vision", "Age"]
+
+# Sample training data for column transformer fitting
+X_train = pd.DataFrame({
+    "Family_History": [0, 1, 0, 1, 0, 1, 0],
+    "Glucose_Reading": [100, 150, 99, 50, 60, 70, 80],
+    "Frequent_Urination": [0, 1, 0, 1, 0, 1, 0],
+    "Fatigue": [0, 1, 0, 1, 0, 1, 0],
+    "Blurred_Vision": [0, 1, 0, 1, 0, 1, 0],
+    "Age": [25, 30, 20, 40, 50, 60, 70],
+    "Diet_Quality": ['Good', 'Average', 'Poor', 'Average', 'Poor', 'Average', 'Poor'],
+    "Gender": ['Male', 'Female', 'Male', 'Female', 'Male', 'Female', 'Male']
+})
+
+# Fit transformers on the training data at the start of the app
+column_transformer.fit(X_train)
 
 # Lists of responses for variation
 high_risk_messages = [
@@ -35,10 +54,6 @@ def predict():
         else:
             data = request.form.to_dict()
 
-        # Ensure categorical values are correctly processed
-        diet_quality = data.get("Diet_Quality", "Good")  # Default to 'Good' if not provided
-        gender = data.get("Gender", "Male")  # Default to 'Male' if not provided
-
         # Create a DataFrame for the incoming data
         new_patient_df = pd.DataFrame({
              "Family_History": [int(data["Family_History"])],
@@ -47,11 +62,11 @@ def predict():
              "Fatigue": [int(data["Fatigue"])],
              "Blurred_Vision": [int(data["Blurred_Vision"])],
              "Age": [int(data["Age"])],
-             "Diet_Quality": [diet_quality],  # Ensure the value is 'Good', 'Poor', or 'Average'
-             "Gender": [gender]  # Ensure valid values 'Male' or 'Female'
+             "Diet_Quality": [data["Diet_Quality"]],  # Ensure the value is 'Good', 'Poor', or 'Average'
+             "Gender": [data["Gender"]]  # Ensure valid values 'Male' or 'Female'
         })
 
-        # Transform the data (do not call fit again, just transform)
+        # Transform the data using the fitted column transformer (this applies one-hot encoding to categorical data)
         new_patient_encoded = column_transformer.transform(new_patient_df)
         feature_names = column_transformer.get_feature_names_out()
 
@@ -60,7 +75,7 @@ def predict():
 
         # Make prediction using the pre-fitted model
         prediction = model.predict(new_patient_encoded_df)[0]
-        prediction_proba = model.predict_proba(new_patient_encoded_df)[0]  # Get probabilities for both classes
+        prediction_proba = model.predict_proba(new_patient_encoded_df)
 
         # Return results based on the prediction
         if prediction == 1:
@@ -70,7 +85,7 @@ def predict():
 
         return jsonify({
             "prediction": result_text,
-            "confidence": prediction_proba.tolist()  # Return the probabilities for both classes
+            "confidence": prediction_proba.tolist()
         })
 
     except Exception as e:
@@ -78,6 +93,5 @@ def predict():
 
 if __name__ == "__main__":
     app.run(debug=True)
-
 
 
