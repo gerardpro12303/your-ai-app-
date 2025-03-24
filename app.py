@@ -62,15 +62,15 @@ def predict():
             data = request.form.to_dict()
 
         # Create a DataFrame for the incoming data
-        new_patient_df = pd.DataFrame({
-            "Family_History": [int(data["Family_History"])],
-            "Glucose_Reading": [float(data["Glucose_Reading"])],
-            "Frequent_Urination": [int(data["Frequent_Urination"])],
-            "Fatigue": [int(data["Fatigue"])],
-            "Blurred_Vision": [int(data["Blurred_Vision"])],
-            "Age": [int(data["Age"])],
-            "Diet_Quality": [data["Diet_Quality"]],  # Ensure the value is 'Good', 'Poor', or 'Average'
-            "Gender": [data["Gender"]]  # Ensure valid values 'Male' or 'Female'
+new_patient_df = pd.DataFrame({
+    "Family_History": [int(data["Family_History"])],
+    "Glucose_Reading": [float(data["Glucose_Reading"])],
+    "Frequent_Urination": [int(data["Frequent_Urination"])],
+    "Fatigue": [int(data["Fatigue"])],
+    "Blurred_Vision": [int(data["Blurred_Vision"])],
+    "Age": [int(data["Age"])],
+    "Diet_Quality": [data["Diet_Quality"]],  # Ensure the value is 'Good', 'Poor', or 'Average'
+    "Gender": [data["Gender"]]  # Ensure valid values 'Male' or 'Female'
         })
 
         # Transform the data (do not call fit again, just transform)
