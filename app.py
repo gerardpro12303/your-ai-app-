@@ -7,37 +7,9 @@ from sklearn.preprocessing import OneHotEncoder, StandardScaler
 
 app = Flask(__name__)
 
-# Load the trained model (this assumes model.pkl exists in the same directory)
+# Load the trained model and column transformer (this assumes model.pkl and column_transformer.pkl exist in the same directory)
 model = pickle.load(open("model.pkl", "rb"))
 column_transformer = pickle.load(open("column_transformer.pkl", "rb"))
-scaler = pickle.load(open("scaler.pkl", "rb"))
-
-# Define the feature columns
-categorical_features = ["Gender", "Diet_Quality"]
-numerical_features = ["Family_History", "Glucose_Reading", "Frequent_Urination", "Fatigue", "Blurred_Vision", "Age"]
-
-# Define the column transformer (this includes both one-hot encoding and scaling)
-column_transformer = ColumnTransformer(
-    transformers=[
-        ("cat", OneHotEncoder(handle_unknown="ignore", sparse_output=False), categorical_features),
-        ("num", StandardScaler(), numerical_features)
-    ]
-)
-
-# Fit transformers on sample training data only once at the start of the app
-X_train = pd.DataFrame({
-    "Family_History": [0, 1, 0, 1, 0, 1, 0],
-    "Glucose_Reading": [100, 150, 99, 50, 60, 70, 80],
-    "Frequent_Urination": [0, 1, 0, 1, 0, 1, 0],
-    "Fatigue": [0, 1, 0, 1, 0, 1, 0],
-    "Blurred_Vision": [0, 1, 0, 1, 0, 1, 0],
-    "Age": [25, 30, 20, 40, 50, 60, 70],
-    "Diet_Quality": ['Good', 'Average', 'Poor', 'Average', 'Poor','Average', 'Poor'],
-    "Gender": ['Male', 'Female', 'Male', 'Female', 'Male','Female', 'Male']
-})
-
-# Fit transformers on the training data at the start of the app
-column_transformer.fit(X_train)
 
 # Lists of responses for variation
 high_risk_messages = [
@@ -84,7 +56,7 @@ def predict():
 
         # Make prediction using the pre-fitted model
         prediction = model.predict(new_patient_encoded_df)[0]
-        prediction_proba = model.predict_proba(new_patient_encoded_df)
+        prediction_proba = model.predict_proba(new_patient_encoded_df)[0]  # Get probabilities for both classes
 
         # Return results based on the prediction
         if prediction == 1:
@@ -94,7 +66,7 @@ def predict():
 
         return jsonify({
             "prediction": result_text,
-            "confidence": prediction_proba.tolist()
+            "confidence": prediction_proba.tolist()  # Return the probabilities for both classes
         })
 
     except Exception as e:
@@ -102,5 +74,4 @@ def predict():
 
 if __name__ == "__main__":
     app.run(debug=True)
-
 
