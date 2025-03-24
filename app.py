@@ -24,14 +24,14 @@ column_transformer = ColumnTransformer(
 
 # Fit transformers on sample training data only once at the start of the app
 X_train = pd.DataFrame({
-    "Family_History": [0, 1],
-    "Glucose_Reading": [100, 150],
-    "Frequent_Urination": [0, 1],
-    "Fatigue": [0, 1],
-    "Blurred_Vision": [0, 1],
-    "Age": [25, 30],
-    "Diet_Quality": ['Good', 'Average'],
-    "Gender": ['Male', 'Female']
+    "Family_History": [0, 1, 0],
+    "Glucose_Reading": [100, 150, 99],
+    "Frequent_Urination": [0, 1], 0,
+    "Fatigue": [0, 1, 0],
+    "Blurred_Vision": [0, 1, 0],
+    "Age": [25, 30, 20],
+    "Diet_Quality": ['Good', 'Average', 'Poor'],
+    "Gender": ['Male', 'Female', 'Male']
 })
 
 # Fit transformers on the training data at the start of the app
