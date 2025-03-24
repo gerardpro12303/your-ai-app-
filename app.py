@@ -30,7 +30,7 @@ X_train = pd.DataFrame({
     "Fatigue": [0, 1],
     "Blurred_Vision": [0, 1],
     "Age": [25, 30],
-    "Diet_Quality": ['Good', 'Averager', 'Poor'],
+    "Diet_Quality": ['Good', 'Poor'],
     "Gender": ['Male', 'Female']
 })
 
