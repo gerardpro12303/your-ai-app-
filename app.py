@@ -63,7 +63,7 @@ def predict():
 
         # Create a DataFrame for the incoming data
         new_patient_df = pd.DataFrame({
-           "Family_History": [int(data["Family_History"])],
+            "Family_History": [int(data["Family_History"])],
             "Glucose_Reading": [float(data["Glucose_Reading"])],
             "Frequent_Urination": [int(data["Frequent_Urination"])],
             "Fatigue": [int(data["Fatigue"])],
