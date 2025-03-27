@@ -13,7 +13,7 @@ document.addEventListener("DOMContentLoaded", function () {
             "Blurred_Vision": parseInt(document.querySelector("input[name='blurred_vision']").value),
             "Age": parseInt(document.querySelector("input[name='age']").value),
             "Diet_Quality": document.querySelector("select[name='diet_quality']").value,
-            "Gender": document.querySelector("select[name='gender']").value
+            "Gender": document.querySelector("select[name='gender']").value, // ✅ FIXED: Added missing comma
             "Actual_Label": parseInt(document.querySelector("input[name='actual_label']").value) // ✅ Ensure this field is included
         };
 
@@ -31,7 +31,12 @@ document.addEventListener("DOMContentLoaded", function () {
             let result = await response.json();
             console.log("Prediction result:", result); // Debugging step
 
-            document.getElementById("result").innerHTML = `<h3>Prediction: ${result.prediction}</h3>`;
+            document.getElementById("result").innerHTML = `
+                <h3>Prediction: ${result.prediction}</h3>
+                <p>Confidence: ${JSON.stringify(result.confidence)}</p>
+                <p>Accuracy: ${result.accuracy_for_patient}</p>
+                <p>Precision: ${result.precision_for_patient}</p>
+            `;
         } catch (error) {
             console.error("Error:", error);
             document.getElementById("result").innerHTML = `<h3 style="color: red;">Error predicting</h3>`;
