@@ -38,10 +38,13 @@ def predict():
         else:
             data = request.form.to_dict()
 
-        # Log the incoming data for debugging
-        print("Received data:", data)
+        print("Received data:", data)  # Log request data
 
-        # Create DataFrame for incoming data - treating categorical features properly
+        # Ensure "Actual_Label" exists in input, otherwise return error
+        if "Actual_Label" not in data:
+            return jsonify({"error": "Missing 'Actual_Label' field in request"}), 400
+
+        # Create DataFrame for incoming data
         new_patient_df = pd.DataFrame({
             "Family_History": [int(data["Family_History"])],
             "Glucose_Reading": [float(data["Glucose_Reading"])],
@@ -49,41 +52,41 @@ def predict():
             "Fatigue": [int(data["Fatigue"])],
             "Blurred_Vision": [int(data["Blurred_Vision"])],
             "Age": [int(data["Age"])],
-            "Diet_Quality": [data["Diet_Quality"]],  # Leave as string, column transformer will handle it
-            "Gender": [data["Gender"]]  # Leave as string, column transformer will handle it
+            "Diet_Quality": [data["Diet_Quality"]],
+            "Gender": [data["Gender"]]
         })
 
-        # Transform the data using the pre-fitted column transformer
+        # Transform the data
         new_patient_encoded = column_transformer.transform(new_patient_df)
         feature_names = column_transformer.get_feature_names_out()
 
-        # Log the transformed data
+        # Log transformed data
         print("Transformed data:", new_patient_encoded)
 
-        # Create a DataFrame with the transformed data
+        # Create DataFrame with transformed data
         new_patient_encoded_df = pd.DataFrame(new_patient_encoded, columns=feature_names)
 
-        # Make prediction using the pre-fitted model
+        # Make prediction
         prediction = model.predict(new_patient_encoded_df)[0]
         prediction_proba = model.predict_proba(new_patient_encoded_df)
-     
+
         print("Prediction:", prediction, "Confidence:", prediction_proba)
 
-        # Retrieve the actual diagnosis (Must be provided in the input)
-        actual_label = int(data["Actual_Label"])  # Add this field in the input data
+        # Retrieve the actual label from the input
+        actual_label = int(data["Actual_Label"])
 
         # Compute accuracy for this patient
         patient_accuracy = 1.0 if prediction == actual_label else 0.0
 
-        # Compute precision (only applies if prediction == 1)
+        # Compute precision
         if prediction == 1:
             true_positive = 1 if actual_label == 1 else 0
             false_positive = 1 if actual_label == 0 else 0
             patient_precision = true_positive / (true_positive + false_positive) if (true_positive + false_positive) > 0 else 0
         else:
-            patient_precision = "N/A"  # Precision is not applicable for negative predictions
+            patient_precision = "N/A"
 
-        # Return results
+        # Generate result message
         result_text = random.choice(high_risk_messages) if prediction == 1 else random.choice(low_risk_messages)
 
         return jsonify({
@@ -97,25 +100,5 @@ def predict():
         print(f"Error occurred during prediction: {e}")
         return jsonify({"error": str(e)}), 400
 
-        # Log prediction and confidence levels
-        print("Prediction:", prediction, "Confidence:", prediction_proba)
-
-        # Return results based on the prediction
-        if prediction == 1:
-            result_text = random.choice(high_risk_messages)
-        else:
-            result_text = random.choice(low_risk_messages)
-
-        return jsonify({
-            "prediction": result_text,
-            "confidence": prediction_proba.tolist()
-        })
-
-    except Exception as e:
-        print(f"Error occurred during prediction: {e}")
-        return jsonify({"error": str(e)}), 400
-
 if __name__ == "__main__":
     app.run(debug=True)
-
-
