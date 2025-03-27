@@ -66,6 +66,36 @@ def predict():
         # Make prediction using the pre-fitted model
         prediction = model.predict(new_patient_encoded_df)[0]
         prediction_proba = model.predict_proba(new_patient_encoded_df)
+     
+        print("Prediction:", prediction, "Confidence:", prediction_proba)
+
+        # Retrieve the actual diagnosis (Must be provided in the input)
+        actual_label = int(data["Actual_Label"])  # Add this field in the input data
+
+        # Compute accuracy for this patient
+        patient_accuracy = 1.0 if prediction == actual_label else 0.0
+
+        # Compute precision (only applies if prediction == 1)
+        if prediction == 1:
+            true_positive = 1 if actual_label == 1 else 0
+            false_positive = 1 if actual_label == 0 else 0
+            patient_precision = true_positive / (true_positive + false_positive) if (true_positive + false_positive) > 0 else 0
+        else:
+            patient_precision = "N/A"  # Precision is not applicable for negative predictions
+
+        # Return results
+        result_text = random.choice(high_risk_messages) if prediction == 1 else random.choice(low_risk_messages)
+
+        return jsonify({
+            "prediction": result_text,
+            "confidence": prediction_proba.tolist(),
+            "accuracy_for_patient": round(patient_accuracy, 4),
+            "precision_for_patient": patient_precision if isinstance(patient_precision, str) else round(patient_precision, 4)
+        })
+
+    except Exception as e:
+        print(f"Error occurred during prediction: {e}")
+        return jsonify({"error": str(e)}), 400
 
         # Log prediction and confidence levels
         print("Prediction:", prediction, "Confidence:", prediction_proba)
