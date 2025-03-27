@@ -43,6 +43,9 @@ def predict():
         # Ensure "Actual_Label" exists in input, otherwise return error
         if "Actual_Label" not in data:
             return jsonify({"error": "Missing 'Actual_Label' field in request"}), 400
+        
+actual_label = int(data["Actual_Label"])  # This is ONLY for accuracy/precision, not for model input
+
 
         # Create DataFrame for incoming data
         new_patient_df = pd.DataFrame({
