@@ -14,6 +14,7 @@ document.addEventListener("DOMContentLoaded", function () {
             "Age": parseInt(document.querySelector("input[name='age']").value),
             "Diet_Quality": document.querySelector("select[name='diet_quality']").value,
             "Gender": document.querySelector("select[name='gender']").value
+            "Actual_Label": parseInt(document.querySelector("input[name='actual_label']").value) // ✅ Ensure this field is included
         };
 
         console.log("Form Data Collected:", formData); // Debugging step
